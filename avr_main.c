@@ -1,19 +1,16 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+int add_numbers (int a, int b); 
 int main(void)
 {
-    // Set PB5 as output
-    DDRB |= (1 << PB5);
+    add_numbers(5, 6); 
+    while (1);  //this is a comment
+    return 0; //this is a comment too 
+}
 
-    while (1)
-    {
-        // Toggle PB5
-        PORTB ^= (1 << PB5);
-
-        // Delay ~500 ms
-        _delay_ms(500);
-    }
-
-    return 0;
+int add_numbers (int a, int b)
+{
+    int output = a + b; 
+    return output; 
 }
