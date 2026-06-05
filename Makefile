@@ -10,7 +10,7 @@ SRC = avr_main.c
 # Update the PORT to match your Windows COM port (e.g., COM3)
 PORT = COM3
 BAUD = 19200
-PROGRAMMER = avrisp
+PROGRAMMER = usbasp
 
 # Tools
 CC = avr-gcc
@@ -44,7 +44,7 @@ $(TARGET).elf: $(SRC)
 
 # 2. 'make flash': Uploads the HEX file using Arduino as ISP
 flash: $(TARGET).hex
-	$(AVRDUDE) -c $(PROGRAMMER) -p $(MCU) -P $(PORT) -b $(BAUD) -U flash:w:$(TARGET).hex:i
+	 $(AVRDUDE) -c $(PROGRAMMER) -p $(MCU) -U flash:w:$(TARGET).hex:i
 
 # 3. 'make clean': Deletes all generated files to reset the folder
 clean:

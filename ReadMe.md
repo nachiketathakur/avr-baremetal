@@ -41,3 +41,7 @@ Open a **new** Command Prompt or PowerShell window (it must be new so it loads t
 
 ```cmd
 avr-gcc --version
+```
+
+## Step 5: Install avrdude in Windows
+Download the AVR dude from this (https://github.com/avrdudes/avrdude/releases) link and update the path. You may have to restart the command prompt to update the settings. 
