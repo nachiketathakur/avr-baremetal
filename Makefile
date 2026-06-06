@@ -27,6 +27,9 @@ SIZE = avr-size
 # -save-temps: Saves the .i (preprocessed) and .s (assembly) files
 CFLAGS = -Os -Wall -DF_CPU=$(F_CPU) -mmcu=$(MCU) -save-temps
 
+# LDFLAGS: -Wl tells gcc to pass what follows to the linker. 
+# -Map creates the diagnostic map file.
+LDFLAGS = -Wl,-Map=$(TARGET).map
 # ==========================================
 # BUILD TARGETS
 # ==========================================
@@ -44,7 +47,7 @@ $(TARGET).hex: $(TARGET).elf
 
 # Rule to build the .elf file (Linking Stage)
 $(TARGET).elf: $(TARGET).o
-	$(CC) $(CFLAGS) $(TARGET).o -o $(TARGET).elf
+	$(CC) $(CFLAGS) $(TARGET).o -o $(TARGET).elf $(LDFLAGS)
 
 # Rule to build the .o file (Compiling/Assembling Stage)
 $(TARGET).o: $(SRC)
@@ -72,5 +75,5 @@ linker: $(TARGET).elf
 
 # 5. 'make clean': Deletes all generated files to reset the folder
 clean:
-	-del /q /f *.i *.s *.o *.elf *.hex *.txt *.ld 2>nul
+	-del /q /f *.i *.s *.o *.elf *.hex *.txt *.ld *.map 2>nul
 	@echo "All generated files removed."
