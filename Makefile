@@ -4,10 +4,18 @@
 MCU = atmega328p
 F_CPU = 16000000UL
 TARGET = avr_main
-SRC = avr_main.c
+
+# Directory Structure
+SRC_DIR = src
+INC_DIR = inc
+BUILD_DIR = build
+
+# Find all .c files in the src directory
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+# Translate all .c filenames into .o filenames inside the build directory
+OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 # Programmer Settings
-# Update the PORT to match your Windows COM port (e.g., COM3) if needed
 PORT = COM3
 BAUD = 19200
 PROGRAMMER = usbasp
@@ -22,58 +30,63 @@ READELF = avr-readelf
 SIZE = avr-size
 
 # Compiler Flags
-# -Os: Optimize for size
-# -Wall: Show all warnings
-# -save-temps: Saves the .i (preprocessed) and .s (assembly) files
-CFLAGS = -Os -Wall -DF_CPU=$(F_CPU) -mmcu=$(MCU) -save-temps
+# -I$(INC_DIR): Tells the compiler where to find your custom .h files!
+# -save-temps=obj: Saves intermediate files (.i, .s) right next to the .o files in the build dir
+CFLAGS = -Os -Wall -DF_CPU=$(F_CPU) -mmcu=$(MCU) -I$(INC_DIR) -save-temps=obj
 
-# LDFLAGS: -Wl tells gcc to pass what follows to the linker. 
-# -Map creates the diagnostic map file.
-LDFLAGS = -Wl,-Map=$(TARGET).map
+# Linker Flags
+LDFLAGS = -Wl,-Map=$(BUILD_DIR)/$(TARGET).map
+
 # ==========================================
 # BUILD TARGETS
 # ==========================================
 
-# Default target if you just type 'make'
+# Default target
 all: compile
 
 # 1. 'make compile': Generates ELF, HEX, and keeps all intermediate files
-compile: $(TARGET).hex
-	@echo "Compilation complete. Intermediate files saved."
+compile: $(BUILD_DIR)/$(TARGET).hex
+	@echo "Compilation complete. Output placed in $(BUILD_DIR)/"
 
 # Rule to build the .hex file from the .elf file
-$(TARGET).hex: $(TARGET).elf
-	$(OBJCOPY) -O ihex -R .eeprom $(TARGET).elf $(TARGET).hex
+$(BUILD_DIR)/$(TARGET).hex: $(BUILD_DIR)/$(TARGET).elf
+	$(OBJCOPY) -O ihex -R .eeprom $< $@
 
 # Rule to build the .elf file (Linking Stage)
-$(TARGET).elf: $(TARGET).o
-	$(CC) $(CFLAGS) $(TARGET).o -o $(TARGET).elf $(LDFLAGS)
+# Links ALL object files $(OBJS) together
+$(BUILD_DIR)/$(TARGET).elf: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
 
-# Rule to build the .o file (Compiling/Assembling Stage)
-$(TARGET).o: $(SRC)
-	$(CC) $(CFLAGS) -c $(SRC) -o $(TARGET).o
+# Rule to compile .c files to .o files
+# The '| $(BUILD_DIR)' ensures the build folder is created before compiling
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# 2. 'make flash': Uploads the HEX file using USBasp
-flash: $(TARGET).hex
-	$(AVRDUDE) -c $(PROGRAMMER) -p $(MCU) -U flash:w:$(TARGET).hex:i
+# Create the build directory if it doesn't exist (Windows command)
+$(BUILD_DIR):
+	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
 
-# 3. 'make assembler': Dumps assembly and symbol data from the .o file
-assembler: $(TARGET).o
+# 2. 'make flash': Uploads the HEX file
+flash: $(BUILD_DIR)/$(TARGET).hex
+	$(AVRDUDE) -c $(PROGRAMMER) -p $(MCU) -U flash:w:$<:i
+
+# 3. 'make assembler': Dumps assembly and symbol data from all .o files
+assembler: $(OBJS) | $(BUILD_DIR)
 	@echo "--- Extracting Assembler Details ---"
-	$(OBJDUMP) -d $(TARGET).o > $(TARGET)_asm_disassembly.txt
-	$(NM) -n -S $(TARGET).o > $(TARGET)_asm_symbols.txt
-	@echo "Done! Saved to $(TARGET)_asm_disassembly.txt and $(TARGET)_asm_symbols.txt"
+	$(OBJDUMP) -d $(OBJS) > $(BUILD_DIR)/$(TARGET)_asm_disassembly.txt
+	$(NM) -n -S $(OBJS) > $(BUILD_DIR)/$(TARGET)_asm_symbols.txt
+	@echo "Done! Saved to $(BUILD_DIR)/"
 
 # 4. 'make linker': Dumps memory map, sections, and the linker script
-linker: $(TARGET).elf
+linker: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	@echo "--- Extracting Linker Details ---"
-	$(READELF) -S $(TARGET).elf > $(TARGET)_link_sections.txt
-	$(CC) -mmcu=$(MCU) $(TARGET).o -o $(TARGET).elf "-Wl,--verbose" > $(TARGET)_link_script.ld
+	$(READELF) -S $< > $(BUILD_DIR)/$(TARGET)_link_sections.txt
+	$(CC) -mmcu=$(MCU) $(OBJS) -o $< "-Wl,--verbose" > $(BUILD_DIR)/$(TARGET)_link_script.ld
 	@echo "--- Final Memory Usage ---"
-	$(SIZE) $(TARGET).elf
-	@echo "Done! Saved blueprint to $(TARGET)_link_sections.txt and $(TARGET)_link_script.ld"
+	$(SIZE) $<
+	@echo "Done! Saved blueprint to $(BUILD_DIR)/"
 
-# 5. 'make clean': Deletes all generated files to reset the folder
+# 5. 'make clean': Deletes the entire build folder
 clean:
-	-del /q /f *.i *.s *.o *.elf *.hex *.txt *.ld *.map 2>nul
-	@echo "All generated files removed."
+	@if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
+	@echo "Build directory completely removed."
