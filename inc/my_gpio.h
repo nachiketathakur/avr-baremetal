@@ -1,18 +1,19 @@
 #ifndef MY_GPIO_H
 #define MY_GPIO_H
-
+#include <stdint.h> 
+#define REG8(address) (*(volatile uint8_t *)(address))
 /* Register definition - START*/
-#define MY_PINB  (*(volatile uint8_t *)0x23)
-#define MY_DDRB  (*(volatile uint8_t *)0x24)
-#define MY_PORTB (*(volatile uint8_t *)0x25)
+#define MY_PINB  REG8(0x23)
+#define MY_DDRB  REG8(0x24)
+#define MY_PORTB REG8(0x25)
 
-#define MY_PINC  (*(volatile uint8_t *)0x26)
-#define MY_DDRC  (*(volatile uint8_t *)0x27)
-#define MY_PORTC (*(volatile uint8_t *)0x28)
+#define MY_PINC  REG8(0x26)
+#define MY_DDRC  REG8(0x27)
+#define MY_PORTC REG8(0x28)
 
-#define MY_PIND  (*(volatile uint8_t *)0x29)
-#define MY_DDRD  (*(volatile uint8_t *)0x2A)
-#define MY_PORTD (*(volatile uint8_t *)0x2B)
+#define MY_PIND  REG8(0x29)
+#define MY_DDRD  REG8(0x2A)
+#define MY_PORTD REG8(0x2B)
 /* Register definition - END*/
 
 typedef enum {
@@ -22,25 +23,25 @@ typedef enum {
 
 typedef enum {
     GPIO_PIN_LOW = 0, 
-    GPIO_PIN_HIGH,
+    GPIO_PIN_HIGH = 1,
 } my_gpio_pin_state_e; 
 
 typedef enum {
-    GPIO_PIN_0, 
-    GPIO_PIN_1,
-    GPIO_PIN_2,
-    GPIO_PIN_3,
-    GPIO_PIN_4, 
-    GPIO_PIN_5,
-    GPIO_PIN_6, 
-    GPIO_PIN_7,
+    GPIO_PIN_0 = 0, 
+    GPIO_PIN_1 = 1,
+    GPIO_PIN_2 = 2,
+    GPIO_PIN_3 = 3,
+    GPIO_PIN_4 = 4, 
+    GPIO_PIN_5 = 5,
+    GPIO_PIN_6 = 6, 
+    GPIO_PIN_7 = 7,
 } my_gpio_pin_e; 
 
 typedef enum {
     GPIO_PORT_B, 
     GPIO_PORT_C, 
     GPIO_PORT_D, 
-} my_gpio_ports_e; 
+} my_gpio_port_e; 
 
 typedef enum {
     GPIO_OK = 0, 
