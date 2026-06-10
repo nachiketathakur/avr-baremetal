@@ -53,9 +53,22 @@ typedef enum {
 } my_gpio_status_e; 
 
 /* Function prototypes */
-my_gpio_status_e my_gpio_set_direction(my_gpio_ports_e GPIO_PORT, my_gpio_pin_e GPIO_PIN_NUM, my_gpio_dir_e direction); 
-my_gpio_status_e my_gpio_set_output_value(my_gpio_ports_e GPIO_PORT, my_gpio_pin_e GPIO_PIN_NUM, my_gpio_pin_state_e output_val); 
-my_gpio_status_e my_gpio_read(my_gpio_ports_e GPIO_PORT, my_gpio_pin_e GPIO_PIN_NUM, my_gpio_pin_state_e *pin_state); 
-my_gpio_status_e my_gpio_toggle_pin(my_gpio_ports_e GPIO_PORT, my_gpio_pin_e GPIO_PIN_NUM); 
-my_gpio_status_e my_gpio_enable_input_pullup(my_gpio_ports_e GPIO_PORT, my_gpio_pin_e GPIO_PIN_NUM); 
+my_gpio_status_e my_gpio_set_direction(my_gpio_port_e GPIO_PORT,
+                                       my_gpio_pin_e GPIO_PIN_NUM,
+                                       my_gpio_dir_e direction); 
+
+my_gpio_status_e my_gpio_set_output_value(my_gpio_port_e GPIO_PORT,
+                                          my_gpio_pin_e GPIO_PIN_NUM,
+                                          my_gpio_pin_state_e output_val); 
+
+my_gpio_status_e my_gpio_read(my_gpio_port_e GPIO_PORT,
+                              my_gpio_pin_e GPIO_PIN_NUM,
+                              my_gpio_pin_state_e *pin_state); 
+
+my_gpio_status_e my_gpio_toggle_pin(my_gpio_port_e GPIO_PORT,
+                                    my_gpio_pin_e GPIO_PIN_NUM); 
+
+my_gpio_status_e my_gpio_enable_input_pullup(my_gpio_port_e GPIO_PORT,
+                                             my_gpio_pin_e GPIO_PIN_NUM); 
+                                             
 #endif 
